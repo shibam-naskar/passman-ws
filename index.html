@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebSocket Test</title>
+</head>
+<body>
+  <input type="text" id="recipientId" placeholder="Recipient ID">
+  <input type="text" id="message" placeholder="Message">
+  <button onclick="sendMessage()">Send Message</button>
+
+  <script>
+    const socket = new WebSocket('ws://localhost:3000/chat');
+    let clientId;
+
+    socket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      console.log(data)
+      if (data.type === 'clientId') {
+        clientId = data.clientId;
+        console.log(`Connected with client ID: ${clientId}`);
+      } else if (data.type === 'message') {
+        console.log(`Received message: ${data}`);
+      } else if (data.type === 'error') {
+        console.error(`Error: ${data.message}`);
+      }
+    };
+
+    function sendMessage() {
+      const recipientId = document.getElementById('recipientId').value;
+      const message = document.getElementById('message').value;
+
+      if (clientId && recipientId && message) {
+        const data = { recipientId, content: message };
+        socket.send(JSON.stringify(data));
+        console.log(`Sent message to ${recipientId}: ${message}`);
+      } else {
+        console.error('Please enter recipient ID and message');
+      }
+    }
+  </script>
+</body>
+</html>
